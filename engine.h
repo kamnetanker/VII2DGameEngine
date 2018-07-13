@@ -7,6 +7,7 @@ public:
 	int countObject = 0;//Количество объектов для отрисовки
 
 	Engine() {//Ининициализация Движка
+		TrigPredr();
 		window = new RenderWindow(VideoMode(1280, 720), "SFML is Fun");//Инициализация окна
 		this->Update();//Функция обновления движка
 	}

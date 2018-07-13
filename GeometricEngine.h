@@ -100,7 +100,25 @@ public:
 		this->i = a.i;
 		this->k = a.k;
 	}
-
+	///добавить массив заранее просчитанных углов с шагом 0.1
+	void Rotate(float angle) {//Формула поворота против часовой стрелки 
+		if (angle > 6.28 || angle < 0) {
+			while (angle > 6.28)angle -= 6.28;
+			while (angle < 0) angle += 6.28;
+		}
+		float x = this->i;
+		float y = this->k;
+		this->i = x*cosArr[(int)(angle/0.001)] - y*sinArr[(int)(angle / 0.001)];
+		this->k = x*sinArr[(int)(angle / 0.001)] + y*cosArr[(int)(angle / 0.001)];
+	}
+	float GetCosAngle(Vector2D&V2) {//получение косинуса угла между векторами
+		Vector2D&V1 = *this;
+		return V1.i*V2.i + V2.i*V2.i;
+	}
+	float GetAngle(Vector2D&V2) {//получение угла между векторами
+		Vector2D&V1 = *this;
+		return acos(V1.i*V2.i + V2.i*V2.i);
+	}
 };
 class Straight {
 public:
@@ -143,7 +161,7 @@ public:
 		}
 	}
 	Straight(PointDot &a, PointDot &b) {
-		Vector2D AB = Vector2D(a, b);
+		Vector2D AB(a, b);
 		this->A = -1 * AB.k*AB.mod;
 		this->A1 = AB.i;
 		this->B = AB.i*AB.mod;
@@ -189,7 +207,7 @@ public:
 			this->Oy2 = tmp;
 		}
 	}
-	PointDot operator*(Straight &A) {
+	PointDot operator*(Straight &A) {//получение точки пересечения
 		float x, y;
 		if (loop(this->A) == loop(A.A) && loop(this->B) == loop(A.B)) {
 			return PointDot(0, 0);
@@ -228,14 +246,34 @@ public:
 			return PointDot(0, 0);
 		}
 	}
-	bool operator==(PointDot &a) {
+	bool cross(Straight &B) {//функция определения было ли пересечение, без просчета точки пересечения
+		float detA = (this->Ox1 - B.Ox1)*(this->Oy2 - B.Oy1) - (this->Oy1 - B.Oy1)*(this->Ox2 - B.Ox1);
+		float detB = (this->Ox1 - B.Ox2)*(this->Oy2 - B.Oy2) - (this->Oy1 - B.Oy2)*(this->Ox2 - B.Ox2); 
+		return (detA*detB < 0);
+		//метод знаковой площади.
+	}
+	void operator += (Vector2D&arg){//перенос на вектор
+		this->Ox1 += arg.i*arg.mod;
+		this->Ox2 += arg.i*arg.mod;
+		this->Oy1 += arg.k*arg.mod;
+		this->Oy2 += arg.k*arg.mod;
+		this->D = -1 * this->A*(this->Ox1) - this->B*(this->Oy1);
+	}
+	void operator -= (Vector2D&arg) {//перенос на вектор в обратную сторону
+		this->Ox1 -= arg.i*arg.mod;
+		this->Ox2 -= arg.i*arg.mod;
+		this->Oy1 -= arg.k*arg.mod;
+		this->Oy2 -= arg.k*arg.mod;
+		this->D = -1 * this->A*(this->Ox1) - this->B*(this->Oy1);
+	}
+	bool operator==(PointDot &a) {//принадлежит ли точка прямой
 		return this->A*a.x + this->B*a.y + D == 0;
 	}
-	bool operator==(float &a) {
+	bool operator==(float &a) {//принадлежит ли x области
 		return (this->Ox1 <= a&&this->Ox2 >= a);
 	}
 
-	PointDot GetValue(float x) {
+	PointDot GetValue(float x) {//получение y по x
 		if (this->A == 0) {
 			return PointDot(x, (this->D / this->B)*-1);
 		}
