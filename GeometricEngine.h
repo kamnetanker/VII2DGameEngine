@@ -8,6 +8,7 @@ class PointDot {//класс, отвечающий за точку
 public:
 	float x;
 	float y;
+	bool end = false;
 	PointDot(float x, float y) {
 		this->x = x;
 		this->y = y;
@@ -124,6 +125,7 @@ class Straight {
 public:
 	float A, B, D, Ox1, Ox2, Oy1, Oy2;
 	float A1, B1;
+	float midX;
 	Straight() {
 		this->A = 0;
 		this->B = 0;
@@ -133,7 +135,7 @@ public:
 		this->Oy1 = 0;
 		this->Oy2 = 0;
 		this->A1 = 0;
-		this->B1 = 0;
+		this->B1 = 0; 
 	}
 	Straight(float x1, float y1, float x2, float y2, float Ox1 = 0, float Ox2 = 0, float Oy1 = 0, float Oy2 = 0) {
 		if (Ox1 == 0 && Ox2 == 0 && Oy1 == 0 && Oy2 == 0) {
@@ -249,7 +251,9 @@ public:
 	bool cross(Straight &B) {//функция определения было ли пересечение, без просчета точки пересечения
 		float detA = (this->Ox1 - B.Ox1)*(this->Oy2 - B.Oy1) - (this->Oy1 - B.Oy1)*(this->Ox2 - B.Ox1);
 		float detB = (this->Ox1 - B.Ox2)*(this->Oy2 - B.Oy2) - (this->Oy1 - B.Oy2)*(this->Ox2 - B.Ox2); 
-		return (detA*detB < 0);
+		float detC = (B.Ox1 - this->Ox1)*(B.Oy2 - this->Oy1) - (B.Oy1 - this->Oy1)*(B.Ox2 - this->Ox1);
+		float detD = (B.Ox1 - this->Ox2)*(B.Oy2 - this->Oy2) - (B.Oy1 - this->Oy2)*(B.Ox2 - this->Ox2);
+		return (detA*detB < 0) && (detC*detD < 0);
 		//метод знаковой площади.
 	}
 	void operator += (Vector2D&arg){//перенос на вектор
